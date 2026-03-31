@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { sendChatMessage } from "@/lib/api";
+import { sendChatMessage, wakeServer } from "@/lib/api";
 import type { ChatMessage } from "@/lib/api";
 import MessageBubble from "./MessageBubble";
 import FileUpload from "./FileUpload";
@@ -13,8 +13,14 @@ export default function ChatWindow() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [showUpload, setShowUpload] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+  const [serverStatus, setServerStatus] = useState<"waking" | "ready" | "error">("waking");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Wake up server on mount
+  useEffect(() => {
+    wakeServer().then((ok) => setServerStatus(ok ? "ready" : "error"));
+  }, []);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -144,6 +150,19 @@ export default function ChatWindow() {
         </div>
       </header>
 
+      {/* Server status banner */}
+      {serverStatus === "waking" && (
+        <div className="flex items-center gap-2 px-4 py-2 bg-yellow-50 dark:bg-yellow-900/20 border-b border-yellow-200 dark:border-yellow-800 text-yellow-700 dark:text-yellow-400 text-xs">
+          <div className="w-3 h-3 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin shrink-0" />
+          서버 시작 중... 최초 접속 시 최대 30초 소요될 수 있습니다.
+        </div>
+      )}
+      {serverStatus === "error" && (
+        <div className="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-xs">
+          서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4">
         {messages.length === 0 ? (
@@ -206,12 +225,12 @@ export default function ChatWindow() {
             placeholder="Type a message..."
             rows={1}
             className="flex-1 resize-none rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            disabled={isLoading}
+            disabled={isLoading || serverStatus === "waking"}
           />
 
           <button
             onClick={handleSend}
-            disabled={!input.trim() || isLoading}
+            disabled={!input.trim() || isLoading || serverStatus === "waking"}
             className="p-2.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
           >
             {isLoading ? (

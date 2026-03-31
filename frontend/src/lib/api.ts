@@ -1,5 +1,14 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+export async function wakeServer(): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(30000) });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
