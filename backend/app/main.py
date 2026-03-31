@@ -35,6 +35,11 @@ class ChatResponse(BaseModel):
     response: str
 
 
+@app.get("/")
+async def root():
+    return {"status": "ok", "service": "AI Chat Assistant", "version": "1.0.0"}
+
+
 @app.get("/health")
 async def health_check():
     return {"status": "ok", "service": "AI Chat Assistant"}
