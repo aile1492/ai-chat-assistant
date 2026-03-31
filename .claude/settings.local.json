@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(mkdir -p backend/app backend/uploads)",
+      "Bash(mkdir -p frontend)",
+      "Bash(python -m venv venv)",
+      "Bash(source venv/Scripts/activate)",
+      "Bash(pip install:*)",
+      "Bash(python -c \"from app.main import app; print\\(''Import OK''\\)\")",
+      "Bash(npx create-next-app@latest frontend --typescript --tailwind --eslint --app --src-dir --no-turbopack --import-alias \"@/*\")",
+      "Bash(rm -rf frontend)",
+      "Bash(npx create-next-app@latest frontend --typescript --tailwind --eslint --app --src-dir --no-turbopack --import-alias \"@/*\" --yes)",
+      "Bash(npx next:*)",
+      "Bash(curl -s http://localhost:8000/health)",
+      "Bash(curl -s -X POST http://localhost:8000/api/chat/sync -H \"Content-Type: application/json\" -d '{\"\"message\"\": \"\"Hello! Say hi in one sentence.\"\"}')",
+      "Bash(curl -s -X POST http://localhost:8000/api/chat/sync -H \"Content-Type: application/json\" -d \"{\"\"message\"\": \"\"Hello! Say hi in one sentence.\"\"}\")",
+      "Bash(python -c \"from app.config import ANTHROPIC_API_KEY; print\\(f''Key starts with: {ANTHROPIC_API_KEY[:20]}...'' if ANTHROPIC_API_KEY else ''EMPTY''\\)\")",
+      "Bash(python -c \":*)",
+      "Bash(netstat -ano)",
+      "Bash(curl -s -N -X POST http://localhost:8000/api/chat -H \"Content-Type: application/json\" -d \"{\"\"message\"\": \"\"Say hello in Korean, one sentence.\"\"}\")",
+      "Bash(curl -s -N -X POST http://localhost:8000/api/chat -H \"Content-Type: application/json\" -d \"{\"\"message\"\": \"\"Tell me a short joke about programming.\"\"}\")",
+      "Bash(curl -s http://localhost:3000)"
+    ]
+  }
+}
