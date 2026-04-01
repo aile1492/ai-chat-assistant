@@ -28,6 +28,8 @@ app.add_middleware(
 class ChatRequest(BaseModel):
     message: str
     session_id: str | None = None
+    provider: str | None = "groq"    # "groq" (free default) or "anthropic"
+    api_key: str | None = None       # User's own API key
 
 
 class ChatResponse(BaseModel):
@@ -54,7 +56,11 @@ async def chat_endpoint(request: ChatRequest):
     async def event_generator():
         session_id = None
         try:
-            async for sid, chunk in chat_stream(request.message, request.session_id):
+            async for sid, chunk in chat_stream(
+                request.message, request.session_id,
+                provider=request.provider or "groq",
+                api_key=request.api_key or "",
+            ):
                 session_id = sid
                 data = json.dumps({"type": "chunk", "content": chunk, "session_id": sid})
                 yield f"data: {data}\n\n"
@@ -83,7 +89,11 @@ async def chat_sync_endpoint(request: ChatRequest):
 
     full_response = ""
     session_id = ""
-    async for sid, chunk in chat_stream(request.message, request.session_id):
+    async for sid, chunk in chat_stream(
+        request.message, request.session_id,
+        provider=request.provider or "groq",
+        api_key=request.api_key or "",
+    ):
         session_id = sid
         full_response += chunk
 

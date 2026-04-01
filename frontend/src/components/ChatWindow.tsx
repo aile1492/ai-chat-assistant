@@ -2,9 +2,10 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { sendChatMessage, wakeServer } from "@/lib/api";
-import type { ChatMessage } from "@/lib/api";
+import type { ChatMessage, LLMSettings } from "@/lib/api";
 import MessageBubble from "./MessageBubble";
 import FileUpload from "./FileUpload";
+import LLMSettingsPanel from "./LLMSettingsPanel";
 
 export default function ChatWindow() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -16,6 +17,7 @@ export default function ChatWindow() {
   const [serverStatus, setServerStatus] = useState<"waking" | "ready" | "error">("waking");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const llmSettingsRef = useRef<LLMSettings>({ provider: "groq", apiKey: "" });
 
   // Wake up server on mount
   useEffect(() => {
@@ -53,6 +55,7 @@ export default function ChatWindow() {
         userMessage,
         sessionId,
         // onChunk
+
         (chunk) => {
           setMessages((prev) => {
             const updated = [...prev];
@@ -82,7 +85,8 @@ export default function ChatWindow() {
             return updated;
           });
           setIsLoading(false);
-        }
+        },
+        llmSettingsRef.current,
       );
     } catch {
       setMessages((prev) => {
@@ -132,10 +136,11 @@ export default function ChatWindow() {
             AI Chat Assistant
           </h1>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Powered by Claude + LangChain
+            Powered by LangChain
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <LLMSettingsPanel onChange={(s) => (llmSettingsRef.current = s)} />
           {uploadedFiles.length > 0 && (
             <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded-full">
               {uploadedFiles.length} doc{uploadedFiles.length > 1 ? "s" : ""}

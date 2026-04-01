@@ -1,5 +1,12 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+export type LLMProvider = "groq" | "anthropic";
+
+export interface LLMSettings {
+  provider: LLMProvider;
+  apiKey: string; // empty = use server default
+}
+
 export async function wakeServer(): Promise<boolean> {
   try {
     const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(30000) });
@@ -25,12 +32,22 @@ export async function sendChatMessage(
   sessionId: string | null,
   onChunk: (chunk: string) => void,
   onDone: (sessionId: string) => void,
-  onError: (error: string) => void
+  onError: (error: string) => void,
+  llmSettings?: LLMSettings,
 ): Promise<void> {
+  const body: Record<string, unknown> = { message, session_id: sessionId };
+
+  if (llmSettings) {
+    body.provider = llmSettings.provider;
+    if (llmSettings.apiKey) {
+      body.api_key = llmSettings.apiKey;
+    }
+  }
+
   const response = await fetch(`${API_BASE}/api/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message, session_id: sessionId }),
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) {

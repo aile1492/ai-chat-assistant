@@ -7,9 +7,15 @@ env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(dotenv_path=str(env_path), override=True)
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+DEFAULT_PROVIDER = os.getenv("DEFAULT_PROVIDER", "groq")
 UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# Claude model
-CLAUDE_MODEL = "claude-sonnet-4-20250514"
+# Provider → model defaults
+PROVIDER_MODELS = {
+    "groq": "llama-3.3-70b-versatile",
+    "anthropic": "claude-sonnet-4-20250514",
+}
+
 MAX_TOKENS = 4096

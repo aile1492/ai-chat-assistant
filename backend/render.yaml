@@ -5,7 +5,11 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
-      - key: ANTHROPIC_API_KEY
+      - key: GROQ_API_KEY
+        sync: false
+      - key: DEFAULT_PROVIDER
+        value: groq
+      - key: ALLOWED_ORIGINS
         sync: false
       - key: PYTHON_VERSION
         value: "3.12.0"

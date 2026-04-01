@@ -1,7 +1,6 @@
 import os
 from collections import defaultdict
 
-from langchain_anthropic import ChatAnthropic
 from langchain_community.vectorstores import FAISS
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.chains import create_retrieval_chain
@@ -9,7 +8,7 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_community.embeddings import FakeEmbeddings
 
-from app.config import ANTHROPIC_API_KEY, CLAUDE_MODEL, MAX_TOKENS, UPLOAD_DIR
+from app.config import UPLOAD_DIR
 
 # Session -> vector store
 vector_stores: dict[str, FAISS] = {}
@@ -85,22 +84,19 @@ def has_documents(session_id: str) -> bool:
     return session_id in vector_stores
 
 
-def get_rag_chain(session_id: str):
+def get_rag_chain(session_id: str, provider: str = "", api_key: str = ""):
     """Create a RAG chain for the given session."""
     if session_id not in vector_stores:
         return None
+
+    from app.chat import get_llm
 
     retriever = vector_stores[session_id].as_retriever(
         search_type="similarity",
         search_kwargs={"k": 4},
     )
 
-    llm = ChatAnthropic(
-        model=CLAUDE_MODEL,
-        anthropic_api_key=ANTHROPIC_API_KEY,
-        max_tokens=MAX_TOKENS,
-        streaming=True,
-    )
+    llm = get_llm(provider=provider, api_key=api_key)
 
     system_prompt = (
         "You are a helpful AI assistant with access to uploaded documents. "
